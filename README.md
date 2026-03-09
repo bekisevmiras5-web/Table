@@ -1,1 +1,234 @@
-# Table
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Рейтинг команд</title>
+
+<style>
+body{
+font-family: Arial;
+margin:0;
+padding:20px;
+transition:0.3s;
+}
+
+.light{
+background:#f5f5f5;
+color:#222;
+}
+
+.dark{
+background:#1e1e1e;
+color:white;
+}
+
+.container{
+max-width:900px;
+margin:auto;
+}
+
+h1{
+text-align:center;
+}
+
+button{
+padding:8px 15px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:15px;
+margin-bottom:30px;
+}
+
+th,td{
+padding:10px;
+border-bottom:1px solid #ccc;
+text-align:center;
+}
+
+.category-title{
+margin-top:40px;
+font-size:22px;
+}
+
+.add-panel{
+margin-top:20px;
+display:none;
+padding:15px;
+border-radius:10px;
+background:rgba(0,0,0,0.05);
+}
+
+input{
+padding:8px;
+margin:5px;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+.delete-btn{
+background:#ff4d4d;
+color:white;
+}
+
+.theme-btn{
+float:right;
+}
+</style>
+
+</head>
+
+<body class="light">
+
+<div class="container">
+
+<button class="theme-btn" onclick="toggleTheme()">🌙 / ☀️</button>
+
+<h1>🏆 Рейтинг команд</h1>
+
+<button onclick="login()">Вход администратора</button>
+
+<div id="tables"></div>
+
+<div class="add-panel" id="adminPanel">
+
+<h3>Добавить команду</h3>
+
+<input id="name" placeholder="Название команды">
+<input id="city" placeholder="Город / регион">
+<input id="category" placeholder="Категория">
+<input id="score" placeholder="Баллы" type="number">
+
+<br>
+
+<button onclick="addTeam()">Добавить</button>
+
+</div>
+
+</div>
+
+<script>
+
+let password="IT22"
+let isAdmin=false
+
+let teams=[]
+
+function render(){
+
+let container=document.getElementById("tables")
+container.innerHTML=""
+
+let categories={}
+
+teams.forEach((team,index)=>{
+if(!categories[team.category]){
+categories[team.category]=[]
+}
+categories[team.category].push({...team,index})
+})
+
+for(let cat in categories){
+
+let title=document.createElement("h2")
+title.className="category-title"
+title.innerText=cat
+
+let table=document.createElement("table")
+
+table.innerHTML=`
+<thead>
+<tr>
+<th>Команда</th>
+<th>Город</th>
+<th>Баллы</th>
+${isAdmin ? "<th>Удалить</th>" : ""}
+</tr>
+</thead>
+<tbody></tbody>
+`
+
+categories[cat].sort((a,b)=>b.score-a.score)
+
+let tbody=table.querySelector("tbody")
+
+categories[cat].forEach(team=>{
+tbody.innerHTML+=`
+<tr>
+<td>${team.name}</td>
+<td>${team.city}</td>
+<td>${team.score}</td>
+${isAdmin ? `<td><button class="delete-btn" onclick="deleteTeam(${team.index})">Удалить</button></td>` : ""}
+</tr>
+`
+})
+
+container.appendChild(title)
+container.appendChild(table)
+
+}
+
+}
+
+function login(){
+
+let input=prompt("Введите пароль")
+
+if(input===password){
+isAdmin=true
+document.getElementById("adminPanel").style.display="block"
+render()
+}
+else{
+alert("Неверный пароль")
+}
+
+}
+
+function addTeam(){
+
+let name=document.getElementById("name").value
+let city=document.getElementById("city").value
+let category=document.getElementById("category").value
+let score=parseInt(document.getElementById("score").value)
+
+teams.push({name,city,category,score})
+
+render()
+
+}
+
+function deleteTeam(index){
+
+teams.splice(index,1)
+
+render()
+
+}
+
+function toggleTheme(){
+
+let body=document.body
+
+if(body.classList.contains("light")){
+body.classList.remove("light")
+body.classList.add("dark")
+}
+else{
+body.classList.remove("dark")
+body.classList.add("light")
+}
+
+}
+
+render()
+
+</script>
+
+</body>
+</html>
