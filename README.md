@@ -1,232 +1,180 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Рейтинг команд</title>
+<title>Tourist Risks Reflection</title>
 
 <style>
 body{
-font-family: Arial;
-margin:0;
-padding:20px;
-transition:0.3s;
+    font-family: Arial;
+    text-align:center;
+    background:#f4f4f4;
+    padding:20px;
 }
 
-.light{
-background:#f5f5f5;
-color:#222;
-}
-
-.dark{
-background:#1e1e1e;
-color:white;
-}
-
-.container{
-max-width:900px;
-margin:auto;
-}
-
-h1{
-text-align:center;
-}
-
-button{
-padding:8px 15px;
-border:none;
-border-radius:8px;
-cursor:pointer;
+h2{
+    margin-bottom:20px;
 }
 
 table{
-width:100%;
-border-collapse:collapse;
-margin-top:15px;
-margin-bottom:30px;
+    width:90%;
+    margin:auto;
+    border-collapse: collapse;
+    background:white;
 }
 
-th,td{
-padding:10px;
-border-bottom:1px solid #ccc;
-text-align:center;
+th, td{
+    border:1px solid #ccc;
+    padding:10px;
 }
 
-.category-title{
-margin-top:40px;
-font-size:22px;
+.name{
+    text-align:left;
+    font-weight:bold;
 }
 
-.add-panel{
-margin-top:20px;
-display:none;
-padding:15px;
-border-radius:10px;
-background:rgba(0,0,0,0.05);
+.grid{
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:4px;
 }
 
-input{
-padding:8px;
-margin:5px;
-border-radius:6px;
-border:1px solid #ccc;
+.box{
+    width:25px;
+    height:25px;
+    border:1px solid #999;
+    background:white;
+    cursor:pointer;
 }
 
-.delete-btn{
-background:#ff4d4d;
-color:white;
+.red{ background:#ff4d4d; }
+.yellow{ background:#ffd633; }
+.green{ background:#4dff88; }
+
+.result{
+    margin-top:15px;
+    font-size:18px;
+    font-weight:bold;
 }
 
-.theme-btn{
-float:right;
+button{
+    margin-top:20px;
+    padding:10px 20px;
+    cursor:pointer;
+    background:#333;
+    color:white;
+    border:none;
+    border-radius:8px;
 }
 </style>
-
 </head>
 
-<body class="light">
+<body>
 
-<div class="container">
+<h2>🌍 The Main Risks for Tourists – Reflection</h2>
 
-<button class="theme-btn" onclick="toggleTheme()">🌙 / ☀️</button>
+<table>
+<tr>
+<th>Student</th>
+<th>Score (1–10)</th>
+</tr>
 
-<h1>🏆 Рейтинг команд</h1>
+<tbody id="body"></tbody>
+</table>
 
-<button onclick="login()">Вход администратора</button>
+<div class="result" id="result"></div>
 
-<div id="tables"></div>
-
-<div class="add-panel" id="adminPanel">
-
-<h3>Добавить команду</h3>
-
-<input id="name" placeholder="Название команды">
-<input id="city" placeholder="Город / регион">
-<input id="category" placeholder="Категория">
-<input id="score" placeholder="Баллы" type="number">
-
-<br>
-
-<button onclick="addTeam()">Добавить</button>
-
-</div>
-
-</div>
+<button onclick="resetAll()">🔄 Reset</button>
 
 <script>
 
-let password="IT22"
-let isAdmin=false
+const students = [
+"Ботагөз",
+"Жуманова Медина",
+"Жасұлан Ансар",
+"Ануар Ансар",
+"Ануар",
+"Мөлдір",
+"Е. Медина",
+"Жансулу",
+"Акбота",
+"Айлана",
+"Мансур",
+"Асанали"
+];
 
-let teams=[]
+let scores = Array(students.length).fill(0);
 
+// 🎵 SOUND
+function playSound(){
+    let audio = new Audio("https://www.soundjay.com/buttons/sounds/button-16.mp3");
+    audio.play();
+}
+
+// 🎨 COLOR RULE
+function colorClass(n){
+    if(n>=1 && n<=5) return "red";
+    if(n>=6 && n<=7) return "yellow";
+    if(n>=8 && n<=10) return "green";
+    return "";
+}
+
+// 📊 RENDER TABLE
 function render(){
+    let body = document.getElementById("body");
+    body.innerHTML = "";
 
-let container=document.getElementById("tables")
-container.innerHTML=""
+    students.forEach((name, i)=>{
+        let row = document.createElement("tr");
 
-let categories={}
+        let tdName = document.createElement("td");
+        tdName.className = "name";
+        tdName.innerHTML = name;
 
-teams.forEach((team,index)=>{
-if(!categories[team.category]){
-categories[team.category]=[]
-}
-categories[team.category].push({...team,index})
-})
+        let tdScore = document.createElement("td");
 
-for(let cat in categories){
+        let grid = document.createElement("div");
+        grid.className = "grid";
 
-let title=document.createElement("h2")
-title.className="category-title"
-title.innerText=cat
+        for(let j=1; j<=10; j++){
+            let box = document.createElement("div");
+            box.className = "box " + (scores[i]===j ? colorClass(j) : "");
 
-let table=document.createElement("table")
+            box.onclick = function(){
+                scores[i] = j;
+                playSound();
+                render();
+                showResult();
+            };
 
-table.innerHTML=`
-<thead>
-<tr>
-<th>Команда</th>
-<th>Город</th>
-<th>Баллы</th>
-${isAdmin ? "<th>Удалить</th>" : ""}
-</tr>
-</thead>
-<tbody></tbody>
-`
+            grid.appendChild(box);
+        }
 
-categories[cat].sort((a,b)=>b.score-a.score)
-
-let tbody=table.querySelector("tbody")
-
-categories[cat].forEach(team=>{
-tbody.innerHTML+=`
-<tr>
-<td>${team.name}</td>
-<td>${team.city}</td>
-<td>${team.score}</td>
-${isAdmin ? `<td><button class="delete-btn" onclick="deleteTeam(${team.index})">Удалить</button></td>` : ""}
-</tr>
-`
-})
-
-container.appendChild(title)
-container.appendChild(table)
-
+        tdScore.appendChild(grid);
+        row.appendChild(tdName);
+        row.appendChild(tdScore);
+        body.appendChild(row);
+    });
 }
 
+// 📈 RESULT
+function showResult(){
+    let sum = scores.reduce((a,b)=>a+b,0);
+    let avg = (sum / scores.length).toFixed(1);
+    document.getElementById("result").innerHTML =
+        "📊 Average score: " + avg;
 }
 
-function login(){
-
-let input=prompt("Введите пароль")
-
-if(input===password){
-isAdmin=true
-document.getElementById("adminPanel").style.display="block"
-render()
-}
-else{
-alert("Неверный пароль")
+// 🔄 RESET
+function resetAll(){
+    scores = scores.map(()=>0);
+    render();
+    showResult();
 }
 
-}
-
-function addTeam(){
-
-let name=document.getElementById("name").value
-let city=document.getElementById("city").value
-let category=document.getElementById("category").value
-let score=parseInt(document.getElementById("score").value)
-
-teams.push({name,city,category,score})
-
-render()
-
-}
-
-function deleteTeam(index){
-
-teams.splice(index,1)
-
-render()
-
-}
-
-function toggleTheme(){
-
-let body=document.body
-
-if(body.classList.contains("light")){
-body.classList.remove("light")
-body.classList.add("dark")
-}
-else{
-body.classList.remove("dark")
-body.classList.add("light")
-}
-
-}
-
-render()
+render();
+showResult();
 
 </script>
 
